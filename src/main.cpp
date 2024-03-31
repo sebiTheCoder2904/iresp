@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <string.h>
 #include <NimBLEDevice.h>
 
 // See the following for generating UUIDs:
@@ -10,12 +10,14 @@
 #define CHARACTERISTIC_UUID_write  "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
 
 int x;
+String old_read_value;
 
 BLECharacteristic *pCharacteristic_read;
 BLECharacteristic *pCharacteristic_write;
 
 void setup() {
   x = 0;
+  old_read_value = ".";
   Serial.begin(9600);
   Serial.println("Starting BLE work in 5 sec");
   delay(5000);
@@ -47,6 +49,13 @@ void loop() {
   pCharacteristic_read->setValue(String(x) + "\n");
   pCharacteristic_read->notify(); // Notify clients of the value change
   //Serial.println("sent '" + String(x) + "'");
+
+  String now_read_value = String(pCharacteristic_write->getValue());
+  if (!(old_read_value == now_read_value))  {
+    Serial.println(String(now_read_value));
+    old_read_value = now_read_value;
+  }
+
   x++;
   delay(25);
 }
