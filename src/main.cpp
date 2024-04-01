@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <WiFi.h>
 #include <string.h>
 #include <NimBLEDevice.h>
 
@@ -14,6 +15,22 @@ String old_read_value;
 
 BLECharacteristic *pCharacteristic_read;
 BLECharacteristic *pCharacteristic_write;
+
+String printMacAddress() {
+  WiFi.mode(WIFI_OFF); // turn off Wifi to access MAC address
+  delay(10);
+  
+  // Get MAC address
+  uint8_t mac[6];
+  esp_read_mac(mac, ESP_MAC_WIFI_STA);
+  
+  // Convert MAC address to string
+  char macStr[18];
+  sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  
+  return String(macStr);
+}
+
 
 void setup() {
   x = 0;
@@ -50,6 +67,11 @@ void loop() {
   if (!(old_read_value == now_read_value))  {
     Serial.println(String(now_read_value));
     old_read_value = now_read_value;
+
+    if (now_read_value == "macaddress") {
+      String macAddress = printMacAddress();
+      pCharacteristic_read->setValue(macAddress);
+    }
   }
 
   x++;
